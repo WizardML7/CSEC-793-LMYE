@@ -1,1 +1,5 @@
 ecdsa==0.17.0
+numpy
+sounddevice
+scipy
+matplotlib
