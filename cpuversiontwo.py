@@ -6,8 +6,9 @@ import scipy.io.wavfile as wav
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from scipy.signal import spectrogram
-from Crypto.Cipher import AES
+#from Crypto.Cipher import AES
 import os
+import multiprocessing
 
 # Audio recording parameters
 SAMPLE_RATE = 96000  # Higher than the paper's sample rate
@@ -15,32 +16,42 @@ DURATION = 15  # Increased duration for more data
 OUTPUT_FILE = "cpu_leakage_v2.wav"
 STOP_EVENT = threading.Event()
 
-# AES-based CPU-intensive function
+# Intense CPU workload
 def cpu_intensive():
-    """Performs AES encryption repeatedly to stress the CPU."""
-    key = os.urandom(16)  # 128-bit AES key
-    cipher = AES.new(key, AES.MODE_ECB)
-    plaintext = os.urandom(16)  # Random 16-byte block
+    """Performs heavy floating-point and integer operations."""
+    x = np.random.rand(1000000)  # Large array for floating point ops
+    for _ in range(10**7):  # 10x more iterations
+        np.multiply(123456, 654321)
+        np.sin(x) + np.cos(x)  # Floating-point stress
+        np.sqrt(x) / (np.log(x + 1) + 1e-6)  # Additional floating-point ops
 
-    for _ in range(10**7):  # High iteration count
-        _ = cipher.encrypt(plaintext)
+# Intense Memory Workload (3GB RAM)
+def memory_intensive():
+    """Allocates and modifies a large 3GB array with random access patterns."""
+    size = 1024 * 1024 * 1024 // 8  # 3GB array
+    arr = np.zeros((size,), dtype=np.float64)
+    indices = np.random.randint(0, size, size // 10)  # Random access pattern
+    for _ in range(20):  # More iterations to sustain pressure
+        arr[indices] += np.random.rand(len(indices))
 
 # Multi-threaded workload function
 def workload_loop():
-    """Runs multiple CPU tasks in parallel without sleep."""
+    """Runs multiple CPU and memory tasks in parallel."""
     start_time = time.time()
-    threads = []
-    num_threads = os.cpu_count() // 2  # Utilize multiple cores
+    num_threads = max(2, multiprocessing.cpu_count() // 2)  # Utilize multiple CPU cores
     print(f"Starting {num_threads} worker threads...")
 
-    for _ in range(num_threads):
-        t = threading.Thread(target=cpu_intensive)
+    # Create a mix of CPU and memory stress tasks
+    threads = []
+    for i in range(num_threads):
+        t = threading.Thread(target=cpu_intensive if i % 2 == 0 else memory_intensive)
         t.start()
         threads.append(t)
 
     while time.time() - start_time < DURATION:
         if STOP_EVENT.is_set():
             break
+        time.sleep(1)  # Let the tasks run
 
     # Stop all workload threads
     STOP_EVENT.set()
@@ -80,18 +91,12 @@ def plot_audio_spectrum(wav_file_path, nfft=8192, cmap='viridis'):
     plt.ylim(500, 20000)  # Ignore low-frequency noise
     plt.show()
 
-# Run workload and recording simultaneously
 if __name__ == "__main__":
-    workload_thread = threading.Thread(target=workload_loop)
+    workload_thread = threading.Thread(target=workload_loop, daemon=True)
     workload_thread.start()
 
     record_audio()
-
-    # Stop workload after recording
-    STOP_EVENT.set()
-    workload_thread.join()
-
     print("Experiment complete. Displaying spectrogram...")
-    plot_audio_spectrum(OUTPUT_FILE)
 
-    print("Exiting program.")
+    # Display the spectrogram of the recorded file
+    plot_audio_spectrum(OUTPUT_FILE)
