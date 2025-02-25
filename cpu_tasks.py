@@ -4,6 +4,7 @@ import psutil
 import datetime
 import os
 
+LOG_FILE = "cpu_timestamps.log"
 
 def log_system_metrics():
     """Logs current CPU usage."""
@@ -11,9 +12,16 @@ def log_system_metrics():
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f"[{timestamp}] CPU Usage: {cpu_usage}%")
 
+def log_cpu_start_time(worker_id):
+    """Logs the timestamp of when a worker starts."""
+    timestamp = datetime.datetime.now().strftime('%H:%M:%S.%f')[:-3]  # Keep milliseconds
+    with open(LOG_FILE, "a") as f:
+        f.write(f"{timestamp}\n")
+    print(f"Worker {worker_id} (PID {os.getpid()}) started at {timestamp}.")
+
 def heavy_computation(worker_id):
     """Performs CPU-intensive operations for a fixed duration."""
-    print(f"Worker {worker_id} (PID {os.getpid()}) started.")
+    log_cpu_start_time(worker_id)
     end_time = time.time() + 2  # Run for 2 seconds
 
     # Introduce a large array to force memory/cache pressure
