@@ -1,74 +1,65 @@
+import multiprocessing
 import time
 import psutil
-import numpy as np
-import matplotlib.pyplot as plt
+import datetime
 import sounddevice as sd
 import scipy.io.wavfile as wav
-import datetime
+import numpy as np
+
+# Ensure compatibility with Windows multiprocessing
+multiprocessing.set_start_method("spawn", force=True)
 
 def log_system_metrics():
-    cpu_usage = psutil.cpu_percent()
-    memory_usage = psutil.virtual_memory().percent
-    temperatures = psutil.sensors_temperatures()
-    temp_readings = {sensor: [f'{temp.current}°C' for temp in temps] for sensor, temps in temperatures.items()}
+    """Logs current CPU usage."""
+    cpu_usage = psutil.cpu_percent(interval=0.1)
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print(f"[{timestamp}] CPU Usage: {cpu_usage}%, Memory Used: {memory_usage}%, Temperature: {temp_readings}")
+    print(f"[{timestamp}] CPU Usage: {cpu_usage}%")
 
-def cpu_intensive_task(duration=3):
-    print(f"[{datetime.datetime.now()}] CPU-intensive task started.")
+def heavy_computation(_):
+    """Performs CPU-intensive operations for a fixed time."""
     start_time = time.time()
-    while time.time() - start_time < duration:
-        [x ** 2 for x in range(5000000)]  # Increased computation to reach 80% CPU usage
-        log_system_metrics()
+    while time.time() - start_time < 0.8:  # Ensure the task runs for 0.8 seconds
+        [x * x for x in range(50_000_000)]  
+
+def cpu_intensive_task(num_workers=None):
+    """Runs CPU load using multiple workers in a process pool."""
+    if num_workers is None:
+        num_workers = multiprocessing.cpu_count()  # Use all available cores
+
+    print(f"[{datetime.datetime.now()}] CPU-intensive task started with {num_workers} workers.")
+
+    with multiprocessing.Pool(num_workers) as pool:
+        pool.map(heavy_computation, range(num_workers))  
+
+    log_system_metrics()
     print(f"[{datetime.datetime.now()}] CPU-intensive task completed.")
 
-def memory_intensive_task(duration=3):
-    print(f"[{datetime.datetime.now()}] Memory-intensive task started.")
-    try:
-        size = int(psutil.virtual_memory().total * 0.75 // 8)  # Allocate ~75% of total memory
-        arr = np.ones((size,), dtype=np.float64)
-        time.sleep(duration)  # Simulate memory load
-        log_system_metrics()
-    except MemoryError:
-        print("Memory allocation failed!")
-    print(f"[{datetime.datetime.now()}] Memory-intensive task completed.")
-
-def record_audio(duration=30, filename="cpu_leakage.wav"):
+def record_audio(duration, samplerate=44100):
+    """Records audio and returns the audio data."""
     print(f"[{datetime.datetime.now()}] Recording started.")
-    samplerate = 44100
     recording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='float32')
-    sd.wait()
-    wav.write(filename, samplerate, recording)
-    print(f"[{datetime.datetime.now()}] Recording saved as {filename}")
-
-def generate_spectrogram(filename):
-    print(f"[{datetime.datetime.now()}] Generating spectrogram...")
-    samplerate, data = wav.read(filename)
-    plt.specgram(data, Fs=samplerate, cmap='inferno')
-    plt.xlabel('Time [s]')
-    plt.ylabel('Frequency [Hz]')
-    plt.title('Spectrogram')
-    plt.colorbar()
-    plt.show()
-    print(f"[{datetime.datetime.now()}] Spectrogram displayed.")
+    sd.wait()  # Block until recording is done
+    print(f"[{datetime.datetime.now()}] Recording complete.")
+    return recording, samplerate
 
 def run_experiment(iterations=5):
+    """Runs the experiment with CPU workload alternating with idle periods, while recording audio."""
     print(f"[{datetime.datetime.now()}] Experiment started.")
-    record_audio(duration=30)
-    
+
+    total_duration = iterations * (0.8 + 0.4)  # Total recording time
+    recording, samplerate = record_audio(total_duration)  # Start recording synchronously
+
     for i in range(iterations):
         print(f"[{datetime.datetime.now()}] Iteration {i+1}: Starting active workload period.")
-        start_time = time.time()
-        while time.time() - start_time < 3:
-            cpu_intensive_task(duration=0.1)
-            memory_intensive_task(duration=0.1)
-        
+        cpu_intensive_task()
         print(f"[{datetime.datetime.now()}] Iteration {i+1}: Starting inactive period.")
-        time.sleep(3)
-    
-    print(f"[{datetime.datetime.now()}] Experiment complete. Displaying spectrogram...")
-    generate_spectrogram("cpu_leakage.wav")
-    print(f"[{datetime.datetime.now()}] Experiment finished.")
+        time.sleep(0.4)
+
+    # Save recorded audio after experiment is done
+    filename = "cpu_leakage.wav"
+    wav.write(filename, samplerate, (recording * 32767).astype(np.int16))  # Convert to 16-bit PCM
+    print(f"[{datetime.datetime.now()}] Recording saved as {filename}")
+    print(f"[{datetime.datetime.now()}] Experiment complete.")
 
 if __name__ == "__main__":
     run_experiment()
