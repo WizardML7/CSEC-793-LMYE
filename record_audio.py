@@ -1,13 +1,15 @@
+#record_audio.py
 import sounddevice as sd
 import scipy.io.wavfile as wav
 import numpy as np
 import time
 import datetime
+import sys
 
 def record_audio(duration, filename="cpu_leakage.wav", samplerate=44100):
     """Records audio for the specified duration and saves it to a file."""
-    print(f"[{datetime.datetime.now()}] Recording started.")
-    
+    print(f"[{datetime.datetime.now()}] Recording started: {filename}")
+
     recording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='float32')
     sd.wait()  # Block until recording finishes
 
@@ -17,5 +19,11 @@ def record_audio(duration, filename="cpu_leakage.wav", samplerate=44100):
     print(f"[{datetime.datetime.now()}] Recording saved as {filename}")
 
 if __name__ == "__main__":
-    duration = 25  # Adjust to match the expected experiment runtime
-    record_audio(duration)
+    if len(sys.argv) < 3:
+        print("Usage: python3 record_audio.py <duration> <filename>")
+        sys.exit(1)
+
+    duration = int(sys.argv[1])  # Get duration from command-line argument
+    filename = sys.argv[2]  # Get filename from command-line argument
+
+    record_audio(duration, filename)
