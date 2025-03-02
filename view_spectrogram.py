@@ -55,10 +55,10 @@ def generate_spectrogram_with_timestamps(filename="cpu_leakage.wav"):
     plt.pcolormesh(t, f, Sxx, shading='gouraud', cmap='magma')
 
     # Overlay CPU event timestamps
-    event_times = load_cpu_timestamps(LOG_FILE)
+    # event_times = load_cpu_timestamps(LOG_FILE)
 
-    for event in event_times:
-        plt.axvline(x=event, color='cyan', linestyle='--', linewidth=1.5, label="CPU Start" if event == event_times[0] else "")
+    # for event in event_times:
+    #     plt.axvline(x=event, color='cyan', linestyle='--', linewidth=1.5, label="CPU Start" if event == event_times[0] else "")
 
     plt.xlabel('Time [ms]')
     plt.ylabel('Frequency [Hz]')
@@ -68,4 +68,4 @@ def generate_spectrogram_with_timestamps(filename="cpu_leakage.wav"):
     plt.show()
 
 if __name__ == "__main__":
-    generate_spectrogram_with_timestamps("cpu_leakage.wav")
+    generate_spectrogram_with_timestamps("recordings/without_cpu/recording_10.wav")

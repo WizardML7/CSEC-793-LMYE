@@ -18,21 +18,29 @@ for i in $(seq 1 $NUM_RUNS); do
     sleep 2  # Short pause to prevent overlapping
 done
 
+python3 cpu_simple.py &  
+    CPU_PID1=$!
+
+python3 cpu_simple.py &  
+    CPU_PID2=$!
+
+python3 cpu_simple.py &  
+    CPU_PID3=$!
+
 # Run recordings WITH CPU load
 echo "Recording WITH CPU load..."
 for i in $(seq 1 $NUM_RUNS); do
     echo "Run $i/$NUM_RUNS"
 
-    # Start CPU stressor in the background
-    python3 cpu_simple.py &  
-    CPU_PID=$!
 
     # Record while CPU stress is active
     python3 record_audio.py $DURATION "recordings/with_cpu/recording_$i.wav"
 
-    # Stop CPU stressor
-    kill $CPU_PID
     sleep 2  # Short pause before next run
 done
+
+kill $CPU_PID1
+kill $CPU_PID2
+kill $CPU_PID3
 
 echo "Experiment complete. Recordings saved in 'recordings/' directory."
