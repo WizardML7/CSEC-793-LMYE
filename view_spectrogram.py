@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import scipy.io.wavfile as wav
 from scipy.signal import spectrogram, butter, filtfilt
 import datetime
+import sys
 
 LOG_FILE = "cpu_timestamps.log"
 
@@ -62,10 +63,10 @@ def generate_spectrogram_with_timestamps(filename="cpu_leakage.wav"):
 
     plt.xlabel('Time [ms]')
     plt.ylabel('Frequency [Hz]')
-    plt.title('Spectrogram with CPU Load Events')
+    plt.title('Spectrogram')
     plt.colorbar(label='Power (dB)')
     plt.legend()
     plt.show()
 
 if __name__ == "__main__":
-    generate_spectrogram_with_timestamps("recordings/without_cpu/recording_10.wav")
+    generate_spectrogram_with_timestamps(sys.argv[1])

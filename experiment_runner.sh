@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default number of iterations
-NUM_RUNS=${1:-50}
+NUM_RUNS=${1:-150}
 DURATION=10  # Each recording duration in seconds
 
 # Create directories for organization
@@ -27,6 +27,12 @@ python3 cpu_simple.py &
 python3 cpu_simple.py &  
     CPU_PID3=$!
 
+python3 cpu_simple.py &  
+    CPU_PID4=$!
+
+python3 cpu_simple.py &  
+    CPU_PID5=$!
+
 # Run recordings WITH CPU load
 echo "Recording WITH CPU load..."
 for i in $(seq 1 $NUM_RUNS); do
@@ -42,5 +48,7 @@ done
 kill $CPU_PID1
 kill $CPU_PID2
 kill $CPU_PID3
+kill $CPU_PID4
+kill $CPU_PID5
 
 echo "Experiment complete. Recordings saved in 'recordings/' directory."
