@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default number of iterations
-NUM_RUNS=${1:-30}
+NUM_RUNS=${1:-100}
 DURATION=10  # Each recording duration in seconds
 
 # Create directories for organization
