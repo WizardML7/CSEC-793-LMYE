@@ -28,4 +28,4 @@ if __name__ == "__main__":
 
     print(sd.query_devices())
 
-    record_audio(duration, filename, device="name")
+    record_audio(duration, filename, device=23)
