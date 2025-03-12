@@ -6,7 +6,7 @@ import time
 import datetime
 import sys
 
-def record_audio(duration, filename="voip_capture.wav", samplerate=44100, device=None):
+def record_audio(duration, filename="voip_capture.wav", samplerate=48000, device=None):
     """Records audio for the specified duration and saves it to a file."""
     print(f"[{datetime.datetime.now()}] Recording started: {filename}")
 
@@ -28,4 +28,4 @@ if __name__ == "__main__":
 
     print(sd.query_devices())
 
-    record_audio(duration, filename, device=23)
+    record_audio(duration, filename, device=24)
