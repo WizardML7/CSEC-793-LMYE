@@ -13,6 +13,7 @@ for i in $(seq 1 $NUM_RUNS); do
     echo "Run $i/$NUM_RUNS"
     python3 cpu_alternate.py &  
         CPU_PID1=$!
+    sleep 10
     sleep 2  # Short pause to prevent overlapping
     kill $CPU_PID1
 done
