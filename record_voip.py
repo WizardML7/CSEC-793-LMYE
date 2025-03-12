@@ -1,31 +1,55 @@
-#record_audio.py
 import sounddevice as sd
-import scipy.io.wavfile as wav
 import numpy as np
+import wave
 import time
 import datetime
-import sys
+import os
 
-def record_audio(duration, filename="voip_capture.wav", samplerate=48000, device=None):
+# Configuration
+NUM_RUNS = 100  # Must match victim script
+DURATION = 10  # Each recording duration in seconds
+SAMPLERATE = 48000  # Common sample rate
+DEVICE = 17  # Ensure this is correct (VB-Audio Virtual Cable)
+RECORDING_DIR = "recordings/voip_alternating/"
+
+# Ensure recording directory exists
+os.makedirs(RECORDING_DIR, exist_ok=True)
+
+def record_audio(duration, filename):
     """Records audio for the specified duration and saves it to a file."""
     print(f"[{datetime.datetime.now()}] Recording started: {filename}")
 
-    recording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype='float32', device=device)
-    sd.wait()  # Block until recording finishes
+    recording = sd.rec(
+        int(duration * SAMPLERATE),
+        samplerate=SAMPLERATE,
+        channels=2,
+        dtype='float32',
+        device=DEVICE,
+        blocking=True
+    )
+    
+    # Convert to 16-bit PCM format
+    recording = np.int16(recording * 32767)
 
-    # Save as 16-bit PCM WAV
-    wav.write(filename, samplerate, (recording * 32767).astype(np.int16))
+    # Save as WAV file
+    with wave.open(filename, 'wb') as wf:
+        wf.setnchannels(2)
+        wf.setsampwidth(2)  # 16-bit audio
+        wf.setframerate(SAMPLERATE)
+        wf.writeframes(recording.tobytes())
 
     print(f"[{datetime.datetime.now()}] Recording saved as {filename}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python3 record_audio.py <duration> <filename>")
-        sys.exit(1)
+    print(f"Starting {NUM_RUNS} recording runs.")
 
-    duration = int(sys.argv[1])  # Get duration from command-line argument
-    filename = sys.argv[2]  # Get filename from command-line argument
+    for i in range(NUM_RUNS):
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = os.path.join(RECORDING_DIR, f"voip_capture_{timestamp}.wav")
+        
+        print(f"Run {i+1}/{NUM_RUNS}")
+        record_audio(DURATION, filename)
+        
+        time.sleep(2)  # Short pause before next run
 
-    print(sd.query_devices())
-
-    record_audio(duration, filename, device=24)
+    print("All recordings complete.")

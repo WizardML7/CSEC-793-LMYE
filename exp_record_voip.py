@@ -17,4 +17,4 @@ def record_audio(duration, filename, device):
         wf.setframerate(samplerate)
         wf.writeframes(recording.tobytes())
 
-record_audio(20, "voip_capture.wav", device=17)
+record_audio(25, "voip_capture.wav", device=17)

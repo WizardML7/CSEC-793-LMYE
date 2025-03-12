@@ -1,26 +1,20 @@
+#!/bin/bash
 
+# Default number of iterations
+NUM_RUNS=${1:-100}
+DURATION=10  # Each recording duration in seconds
 
-python3 cpu_simple.py &  
-    CPU_PID1=$!
+# Create directories for organization
 
-python3 cpu_simple.py &  
-    CPU_PID2=$!
+echo "Starting experiment with $NUM_RUNS."
 
-python3 cpu_simple.py &  
-    CPU_PID3=$!
+echo "CPU load alternating."
+for i in $(seq 1 $NUM_RUNS); do
+    echo "Run $i/$NUM_RUNS"
+    python3 cpu_alternate.py &  
+        CPU_PID1=$!
+    sleep 2  # Short pause to prevent overlapping
+    kill $CPU_PID1
+done
 
-python3 cpu_simple.py &  
-    CPU_PID4=$!
-
-python3 cpu_simple.py &  
-    CPU_PID5=$!
-
-
-sleep 60
-
-
-kill $CPU_PID1
-kill $CPU_PID2
-kill $CPU_PID3
-kill $CPU_PID4
-kill $CPU_PID5
+echo "Experiment complete. Recordings saved in 'recordings/' directory."
