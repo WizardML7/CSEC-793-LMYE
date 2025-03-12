@@ -41,6 +41,8 @@ def record_audio(duration, filename):
     print(f"[{datetime.datetime.now()}] Recording saved as {filename}")
 
 if __name__ == "__main__":
+    time.sleep(15)  # Running to the victim to start that script
+
     print(f"Starting {NUM_RUNS} recording runs.")
 
     for i in range(NUM_RUNS):
