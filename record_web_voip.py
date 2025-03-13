@@ -53,14 +53,13 @@ if __name__ == "__main__":
     print(f"Starting {NUM_RUNS} recording runs.")
 
     for i in range(NUM_RUNS):
-        website_index = i % len(WEBSITES)  # Loop through websites
-        website_name = WEBSITES[website_index]
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = os.path.join(RECORDING_DIR, f"{website_name}_{timestamp}.wav")
-        
-        print(f"Run {i+1}/{NUM_RUNS} - Recording for {website_name}")
-        record_audio(DURATION, filename)
-        
-        time.sleep(5)  # Match pause duration from victim script
+        for website in WEBSITES:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = os.path.join(RECORDING_DIR, f"{website}_{timestamp}.wav")
+            
+            print(f"Run {i+1}/{NUM_RUNS} - Recording for {website}")
+            record_audio(DURATION, filename)
+            
+            time.sleep(5)  # Match pause duration from victim script
 
     print("All recordings complete.")
