@@ -12,6 +12,9 @@ FIREFOX_BINARY_PATH = "/usr/bin/firefox"
 options = Options()
 options.binary_location = FIREFOX_BINARY_PATH
 
+profile_path = ""
+options.add_argument(f"--profile={profile_path}")
+
 if len(sys.argv) != 2:
     print("Usage: python3 browse_websites.py <website_url>")
     sys.exit(1)
