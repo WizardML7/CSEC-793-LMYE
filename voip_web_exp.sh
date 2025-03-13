@@ -27,7 +27,7 @@ websites=(
 for i in $(seq 1 $NUM_RUNS); do
     for site in "${websites[@]}"; do
         echo "Run $i/$NUM_RUNS - Visiting $site"
-        python3 browse_websites.py "$site"
+        python3 simple_websites.py "$site"
         sleep 5  # Short pause between visits
     done
 done
