@@ -9,16 +9,19 @@ if len(sys.argv) != 2:
 
 site = sys.argv[1]  # Get website URL from command-line argument
 
-print(f"Opening {site} in Firefox...")
+print(f"Opening {site} in the default web browser...")
 
-# Specify Firefox as the browser to use
-firefox = webbrowser.get('firefox')
-firefox.open(site)  # Open the website in Firefox
+# Open the website in the system's default web browser
+browser = webbrowser.get()  
+browser.open(site)
 
 # Keep the script running for 40 seconds
 time.sleep(40)
 
-# Close the Firefox tab (Ctrl + W)
-os.system("pkill firefox")
+# Attempt to close the browser (may depend on OS and browser behavior)
+os.system("pkill -f 'chrome|firefox|brave|edge'")  # Kill common browsers on Linux/macOS
+os.system("taskkill /IM chrome.exe /F")  # Kill Chrome on Windows
+os.system("taskkill /IM msedge.exe /F")  # Kill Edge on Windows
+os.system("taskkill /IM firefox.exe /F")  # Kill Firefox on Windows
 
 print(f"Finished {site}.")
