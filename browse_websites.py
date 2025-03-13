@@ -4,7 +4,7 @@ import time
 import sys
 
 # Path to GeckoDriver (replace with your actual path)
-GECKO_DRIVER_PATH = "usr/local/bin/geckodriver"
+GECKO_DRIVER_PATH = "/usr/local/bin/geckodriver"
 
 if len(sys.argv) != 2:
     print("Usage: python3 browse_websites.py <website_url>")
@@ -15,7 +15,7 @@ site = sys.argv[1]  # Get website URL from command-line argument
 # Setup Firefox WebDriver
 service = Service(GECKO_DRIVER_PATH)
 options = webdriver.FirefoxOptions()
-options.add_argument("--headless")  # Run without opening a visible browser window
+#options.add_argument("--headless")  # Run without opening a visible browser window
 
 print(f"Opening {site}...")
 
