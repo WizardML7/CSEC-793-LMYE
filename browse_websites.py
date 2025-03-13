@@ -17,6 +17,8 @@ options.set_preference("general.useragent.override", "Mozilla/5.0 (Windows NT 10
 profile_path = ""
 options.add_argument(f"--profile={profile_path}")
 
+options.set_preference("marionette.enabled", False)
+
 if len(sys.argv) != 2:
     print("Usage: python3 browse_websites.py <website_url>")
     sys.exit(1)
