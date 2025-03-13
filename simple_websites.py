@@ -1,7 +1,7 @@
 import webbrowser
 import time
 import sys
-import pyautogui
+import os
 
 if len(sys.argv) != 2:
     print("Usage: python3 browse_websites.py <website_url>")
@@ -19,6 +19,6 @@ firefox.open(site)  # Open the website in Firefox
 time.sleep(40)
 
 # Close the Firefox tab (Ctrl + W)
-pyautogui.hotkey('ctrl', 'w')
+os.system("pkill firefox")
 
 print(f"Finished {site}.")
