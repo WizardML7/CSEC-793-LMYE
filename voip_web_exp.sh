@@ -23,9 +23,19 @@ websites=(
     "https://www.nationalgeographic.com"
 )
 
+# Initial setup wait
+echo "Waiting 15 seconds before starting to align with attacker..."
+sleep 15
+
 # Run the experiment
-for i in $(seq 1 $NUM_RUNS); do
+for ((i=1; i<=NUM_RUNS; i++)); do
     for site in "${websites[@]}"; do
+        # Wait until the next full minute before starting
+        current_second=$(date +%S)
+        wait_time=$((60 - current_second))
+        echo "Waiting $wait_time seconds for next minute sync..."
+        sleep $wait_time
+
         echo "Run $i/$NUM_RUNS - Visiting $site"
         python3 simple_websites.py "$site"
         sleep 5  # Short pause between visits

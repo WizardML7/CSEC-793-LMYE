@@ -48,15 +48,21 @@ def record_audio(duration, filename):
 
 if __name__ == "__main__":
     print("Waiting 15 seconds before starting to align with victim...")
-    time.sleep(15)  # Sync start time with victim
+    time.sleep(15)  # Initial setup delay
 
     print(f"Starting {NUM_RUNS} recording runs.")
 
     for i in range(NUM_RUNS):
         for website in WEBSITES:
+            # Wait until the next full minute before starting
+            now = datetime.datetime.now()
+            wait_time = 60 - now.second
+            print(f"Waiting {wait_time} seconds for next minute sync...")
+            time.sleep(wait_time)
+
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = os.path.join(RECORDING_DIR, f"{website}_{timestamp}.wav")
-            
+
             print(f"Run {i+1}/{NUM_RUNS} - Recording for {website}")
             record_audio(DURATION, filename)
             
